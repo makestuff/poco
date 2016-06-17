@@ -22,6 +22,7 @@
 
 #include "Poco/Data/Data.h"
 #include <cstddef>
+#include <iostream>
 
 
 namespace Poco {
@@ -88,6 +89,8 @@ public:
 
 	bool isNullable() const;
 		/// Returns true if column allows null values, false otherwise.
+
+	friend std::ostream& operator<<(std::ostream& os, const MetaColumn& mc);
 
 protected:
 	void setName(const std::string& name);

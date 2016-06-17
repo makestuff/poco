@@ -16,10 +16,30 @@
 
 #include "Poco/Data/MetaColumn.h"
 
-
 namespace Poco {
 namespace Data {
 
+const char* const g_colDTNames[] = {
+	"FDT_BOOL",
+	"FDT_INT8",
+	"FDT_UINT8",
+	"FDT_INT16",
+	"FDT_UINT16",
+	"FDT_INT32",
+	"FDT_UINT32",
+	"FDT_INT64",
+	"FDT_UINT64",
+	"FDT_FLOAT",
+	"FDT_DOUBLE",
+	"FDT_STRING",
+	"FDT_WSTRING",
+	"FDT_BLOB",
+	"FDT_CLOB",
+	"FDT_DATE",
+	"FDT_TIME",
+	"FDT_TIMESTAMP",
+	"FDT_UNKNOWN"
+};
 
 MetaColumn::MetaColumn()
 {
@@ -44,6 +64,13 @@ MetaColumn::MetaColumn(std::size_t columnPosition,
 
 MetaColumn::~MetaColumn()
 {
+}
+
+
+std::ostream& operator<<(std::ostream& os, const MetaColumn& mc)
+{
+	os << "MetaColumn(name=\"" << mc._name << "\", length=" << mc._length << ", type=" << g_colDTNames[mc._type] << ")";
+	return os;
 }
 
 

@@ -1,0 +1,36 @@
+{
+   sybnet__init
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:sybnet__init
+}
+{
+   sybnet_init_drivers
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:sybnet_init_drivers
+}
+{
+   sybnet_init_poll
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   fun:sybnet_init_poll
+}
+{
+   sybnet_grow_addrs
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:sybnet_grow_addrs
+}
+{
+   sybnet_init_filters
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:sybnet_init_filters
+}

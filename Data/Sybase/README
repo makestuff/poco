@@ -1,0 +1,4 @@
+export POCO_BASE=$HOME/poco
+export SYBASE_OCS=/home/chris/sap/OCS-16_0
+make clean
+make 
