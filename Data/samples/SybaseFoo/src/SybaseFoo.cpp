@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	//Poco::DateTime dob[2];
 	try
 	{
-		Session session("phylum", "SERVER=MOBIX CS_USERNAME=sa CS_PASSWORD=mun789");
+		Session session("sybase", "SERVER=MOBIX CS_USERNAME=sa CS_PASSWORD=mun789");
 		
 		//session << "drop table if exists person", now;
 		//session << "create table person (name varchar(30), address varchar(30), age int, dob date)", now;

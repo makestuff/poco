@@ -12,7 +12,7 @@
 // during connector automatic (un)registration, it is 
 // best to have this as a macro.
 
-#define POCO_DATA_SYBASE_CONNECTOR_NAME "phylum"
+#define POCO_DATA_SYBASE_CONNECTOR_NAME "sybase"
 
 namespace Poco {
 namespace Data {
