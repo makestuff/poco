@@ -125,6 +125,7 @@ StatementExecutor::StatementExecutor(SessionHandle& sessionHandle):
 	_sessionHandle(sessionHandle),
 	_state(STMT_INITED),
 	_query(""),
+	_affectedRowCount(0),
 	_command(0)
 {
 	CS_CONNECTION* const conn = _sessionHandle.getConnection();
@@ -244,20 +245,43 @@ void StatementExecutor::execute()
 		throw StatementException(msg.str());
 	}
 
-	// Execute
+	// Execute the previously-prepared statement
 	ret = ct_dynamic(_command, CS_EXECUTE, dynStmt, CS_NULLTERM, NULL, CS_UNUSED);
 	CHECK_STATUS("ct_dynamic(CS_EXECUTE)");
 	ret = ct_send(_command);
 	CHECK_STATUS("ct_send(CS_EXECUTE)");
 	ret = ct_results(_command, &resultType);
-	RESULT_EXPECT("[1]ct_results(CS_EXECUTE)", CS_SUCCEED, CS_ROW_RESULT);
-	for ( std::size_t i = 0; i < countColumns; ++i )
+	CHECK_STATUS("[1]ct_results(CS_EXECUTE)");
+	if ( resultType == CS_ROW_RESULT )
 	{
-		CS_DATAFMT& colFmt = _colSybFmt[i];
-		CS_VOID* const colData = _rowData[i];
-		CS_INT& colNumBytes = _rowNumBytes[i];
-		ret = ct_bind(_command, i+1, &colFmt, colData, &colNumBytes, NULL);  // TODO: NULL-indicator
-		CHECK_STATUS("ct_bind()");
+		// Got some rows; bind variables ready for fetching. The remaining ct_results() will be gathered in fetch().
+		for ( std::size_t i = 0; i < countColumns; ++i )
+		{
+			CS_DATAFMT& colFmt = _colSybFmt[i];
+			CS_VOID* const colData = _rowData[i];
+			CS_INT& colNumBytes = _rowNumBytes[i];
+			ret = ct_bind(_command, i+1, &colFmt, colData, &colNumBytes, NULL);  // TODO: NULL-indicator
+			CHECK_STATUS("ct_bind()");
+		}
+	}
+	else if ( resultType == CS_CMD_SUCCEED )
+	{
+		// No rows returned, therefore fetch() will NOT be called, so cleanup here
+		CS_INT rowCount;
+		ret = ct_res_info(_command, CS_ROW_COUNT, &rowCount, sizeof(rowCount), NULL);
+		_affectedRowCount = static_cast<std::size_t>(rowCount);
+		CHECK_STATUS("ct_res_info()");
+		ret = ct_results(_command, &resultType);
+		RESULT_EXPECT("[2]ct_results(CS_EXECUTE)", CS_SUCCEED, CS_CMD_DONE);
+		ret = ct_results(_command, &resultType);
+		RESULT_EXPECT("[3]ct_results(CS_EXECUTE)", CS_END_RESULTS, CS_CMD_DONE);
+	}
+	else
+	{
+		// We're expecting either CS_ROW_RESULT or CS_CMD_SUCCEED; anything else is an error
+		std::ostringstream msg;
+		msg << "[1]ct_results(CS_EXECUTE) misbehaving: resultType=" << resultNames[resultType-CS_ROW_RESULT];
+		throw StatementException(msg.str());
 	}
 	_state = STMT_EXECUTED;
 }
@@ -313,8 +337,7 @@ bool StatementExecutor::fetch()
 
 std::size_t StatementExecutor::getAffectedRowCount() const
 {
-	// TODO: implement
-	return 3;  //_affectedRowCount;
+	return _affectedRowCount;
 }
 
 
@@ -335,7 +358,7 @@ const MetaColumn& StatementExecutor::metaColumn(std::size_t pos) const
 
 void StatementExecutor::clearResults()
 {
-	// TODO: actually clear results
+	_affectedRowCount = 0;
 }
 
 

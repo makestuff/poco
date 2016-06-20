@@ -64,6 +64,7 @@ private:
 	SessionHandle& _sessionHandle;
 	State _state;
 	std::string _query;
+	std::size_t _affectedRowCount;
 	CS_COMMAND* _command;
 	std::vector<MetaColumn> _colPocoFmt;  // column formats, from the Poco perspective
 	std::vector<CS_DATAFMT> _colSybFmt;   // column formats, from the Sybase perspective

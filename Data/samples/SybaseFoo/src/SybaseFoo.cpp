@@ -1,57 +1,59 @@
-#include "Poco/SharedPtr.h"
-#include "Poco/DateTime.h"
-#include "Poco/Data/SessionFactory.h"
 #include "Poco/Data/Session.h"
 #include "Poco/Data/RecordSet.h"
-#include "Poco/Data/Column.h"
-#include "Poco/Data/Phylum/Connector.h"
 #include <iostream>
 
+
 using namespace Poco::Data::Keywords;
-using namespace std;
 using Poco::Data::Session;
 using Poco::Data::Statement;
 using Poco::Data::RecordSet;
 
+
 int main(int argc, char* argv[])
 {
-	string name[2], address[2];
-	int age[2];
-	//Poco::DateTime dob[2];
 	try
 	{
+		// create a session
 		Session session("sybase", "SERVER=MOBIX CS_USERNAME=sa CS_PASSWORD=mun789");
-		
-		//session << "drop table if exists person", now;
-		//session << "create table person (name varchar(30), address varchar(30), age int, dob date)", now;
 
-		//DateTime bd(1980, 4, 1);
-		//DateTime ld(1982, 5, 9);
-		//session << "insert into person values('Bart Simpson', 'Springfield', 12, $1)", use(bd), now;
-		//session << "insert into person values('Lisa Simpson', 'Springfield', 10, $1)", use(ld), now;
+		// drop sample table, if it exists
+		session << "if exists (select 1 from pubs2..sysobjects where name='person') drop table pubs2..person", now;
+
+		// (re)create table
+		session << "create table pubs2..person (name varchar(30), address varchar(30), age int, dob date)", now;
+
+		// insert some rows
+		session << "insert into pubs2..person values('Bart Simpson', 'Springfield', 12, '1980-04-01')", now;
+		session << "insert into pubs2..person values('Lisa Simpson', 'Springfield', 10, '1982-05-09')", now;
+		session << "insert into pubs2..person values('Maggie Simpson', 'Springfield', 1, '1986-04-19')", now;
 		
+		// a simple query
 		Statement select(session);
 		select << "select name, address, age from pubs2..person";
 		select.execute();
-		
+
+		// create a RecordSet
 		RecordSet rs(select);
-		//const size_t cols = rs.columnCount();
-		rs.moveFirst();
-		name[0] = rs[0].convert<string>();
-		address[0] = rs[1].convert<string>();
-		age[0] = rs[2].convert<Poco::Int32>();
-		//dob[0] = rs[3].convert<Poco::DateTime>();
-		rs.moveNext();
-		name[1] = rs[0].convert<string>();
-		address[1] = rs[1].convert<string>();
-		age[1] = rs[2].convert<Poco::Int32>();
-		//dob[1] = rs[3].convert<Poco::DateTime>();
-		for ( int i = 0; i < 2; ++i )
-			cout << name[i] << " " << address[i] << " " << age[i] << "\n";
+		const std::size_t cols = rs.columnCount();
+
+		// print all column names
+		for ( std::size_t col = 0; col < cols; ++col )
+			std::cout << rs.columnName(col) << " ";
+		std::cout << std::endl;
+
+		// iterate over all rows and columns
+		bool more = rs.moveFirst();
+		while ( more )
+		{
+			for ( std::size_t col = 0; col < cols; ++col )
+				std::cout << rs[col].convert<std::string>() << " ";
+			std::cout << std::endl;
+			more = rs.moveNext();
+		}
 	}
 	catch ( const Poco::Exception& ex )
 	{
-		cerr << ex.message() << endl;
+		std::cerr << ex.message() << std::endl;
 	}
 	return 0;
 }
