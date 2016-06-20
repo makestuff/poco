@@ -16,7 +16,7 @@ INCLUDE += -isystem $(SYBASE_OCS)/include
 
 SYSLIBS += -L$(SYBASE_OCS)/lib -lsybct64 -lsybtcl64 -lsybcs64 -lsybcomn64 -lsybintl64 -lsybunic64 -Wl,-rpath,$(SYBASE_OCS)/lib
 
-objects = SessionImpl Connector SybaseException SybaseStatementImpl SessionHandle StatementExecutor Extractor Callbacks
+objects = SessionImpl Connector SybaseException SybaseStatementImpl SessionHandle StatementExecutor Extractor Callbacks CTLibNames
 
 target         = PocoDataSybase
 target_version = $(LIBVERSION)

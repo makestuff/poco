@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include "CTLibNames.h"
 
 namespace
 {
@@ -22,66 +23,6 @@ namespace
 		"STMT_COMPILED",
 		"STMT_EXECUTED"
 	};
-	const char* const resultNames[] =
-	{
-		"CS_ROW_RESULT",
-		"CS_CURSOR_RESULT",
-		"CS_PARAM_RESULT",
-		"CS_STATUS_RESULT",
-		"CS_MSG_RESULT",
-		"CS_COMPUTE_RESULT",
-		"CS_CMD_DONE",
-		"CS_CMD_SUCCEED",
-		"CS_CMD_FAIL",
-		"CS_ROWFMT_RESULT",
-		"CS_COMPUTEFMT_RESULT",
-		"CS_DESCRIBE_RESULT"
-	};
-	const char* const _typeNames[] =
-	{
-		"CS_ILLEGAL_TYPE",
-		"CS_CHAR_TYPE",
-		"CS_BINARY_TYPE",
-		"CS_LONGCHAR_TYPE",
-		"CS_LONGBINARY_TYPE",
-		"CS_TEXT_TYPE",
-		"CS_IMAGE_TYPE",
-		"CS_TINYINT_TYPE",
-		"CS_SMALLINT_TYPE",
-		"CS_INT_TYPE",
-		"CS_REAL_TYPE",
-		"CS_FLOAT_TYPE",
-		"CS_BIT_TYPE",
-		"CS_DATETIME_TYPE",
-		"CS_DATETIME4_TYPE",
-		"CS_MONEY_TYPE",
-		"CS_MONEY4_TYPE",
-		"CS_NUMERIC_TYPE",
-		"CS_DECIMAL_TYPE",
-		"CS_VARCHAR_TYPE",
-		"CS_VARBINARY_TYPE",
-		"CS_LONG_TYPE",
-		"CS_SENSITIVITY_TYPE",
-		"CS_BOUNDARY_TYPE",
-		"CS_VOID_TYPE",
-		"CS_USHORT_TYPE",
-		"CS_UNICHAR_TYPE",
-		"CS_BLOB_TYPE",
-		"CS_DATE_TYPE",
-		"CS_TIME_TYPE",
-		"CS_UNITEXT_TYPE",
-		"CS_BIGINT_TYPE",
-		"CS_USMALLINT_TYPE",
-		"CS_UINT_TYPE",
-		"CS_UBIGINT_TYPE",
-		"CS_XML_TYPE",
-		"CS_BIGDATETIME_TYPE",
-		"CS_BIGTIME_TYPE",
-		"CS_TEXTLOCATOR_TYPE",
-		"CS_IMAGELOCATOR_TYPE",
-		"CS_UNITEXTLOCATOR_TYPE"
-	};
-	const char* const* typeNames = _typeNames + 1;  // because CS_ILLEGAL_TYPE == -1
 
 	Poco::Data::MetaColumn::ColumnDataType mapType(CS_INT ctlibType)
 	{
@@ -93,7 +34,7 @@ namespace
 		case CS_INT_TYPE:
 			return Poco::Data::MetaColumn::FDT_INT32;
 		default:
-			std::cerr << typeNames[ctlibType] << " is unsupported!\n";
+			std::cerr << Poco::Data::Sybase::dataTypeName(ctlibType) << " is unsupported!\n";
 			return Poco::Data::MetaColumn::FDT_UNKNOWN;
 		}
 	}
@@ -116,7 +57,7 @@ namespace Sybase {
 	if ( ret != expRet || resultType != expResultType ) \
 	{ \
 		std::ostringstream msg; \
-		msg << funcName " failed: ret=" << ret << "; resultType=" << resultNames[resultType-CS_ROW_RESULT]; \
+		msg << funcName " failed: ret=" << ret << "; resultType=" << resultTypeName(resultType); \
 		throw StatementException(msg.str()); \
 	}
 
@@ -280,7 +221,7 @@ void StatementExecutor::execute()
 	{
 		// We're expecting either CS_ROW_RESULT or CS_CMD_SUCCEED; anything else is an error
 		std::ostringstream msg;
-		msg << "[1]ct_results(CS_EXECUTE) misbehaving: resultType=" << resultNames[resultType-CS_ROW_RESULT];
+		msg << "[1]ct_results(CS_EXECUTE) misbehaving: resultType=" << resultTypeName(resultType);
 		throw StatementException(msg.str());
 	}
 	_state = STMT_EXECUTED;
