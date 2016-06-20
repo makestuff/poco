@@ -14,22 +14,22 @@ int main(int argc, char* argv[])
 	try
 	{
 		// create a session
-		Session session("sybase", "SERVER=MOBIX CS_USERNAME=sa CS_PASSWORD=mun789");
+		Session session("sybase", "SERVER=MOBIX DATABASE=pubs2 CS_USERNAME=sa CS_PASSWORD=mun789");
 
 		// drop sample table, if it exists
-		session << "if exists (select 1 from pubs2..sysobjects where name='person') drop table pubs2..person", now;
+		session << "if exists (select 1 from sysobjects where name='person') drop table person", now;
 
 		// (re)create table
-		session << "create table pubs2..person (name varchar(30), address varchar(30), age int, dob date)", now;
+		session << "create table person (name varchar(30), address varchar(30), age int, dob date)", now;
 
 		// insert some rows
-		session << "insert into pubs2..person values('Bart Simpson', 'Springfield', 12, '1980-04-01')", now;
-		session << "insert into pubs2..person values('Lisa Simpson', 'Springfield', 10, '1982-05-09')", now;
-		session << "insert into pubs2..person values('Maggie Simpson', 'Springfield', 1, '1986-04-19')", now;
+		session << "insert into person values('Bart Simpson', 'Springfield', 12, '1980-04-01')", now;
+		session << "insert into person values('Lisa Simpson', 'Springfield', 10, '1982-05-09')", now;
+		session << "insert into person values('Maggie Simpson', 'Springfield', 1, '1986-04-19')", now;
 		
 		// a simple query
 		Statement select(session);
-		select << "select name, address, age from pubs2..person";
+		select << "select name, address, age from person";
 		select.execute();
 
 		// create a RecordSet

@@ -32,6 +32,7 @@ public:
 		/// TODO: this kinda sucks because it exposes internals
 private:
 	bool isConnectedNoLock() const;
+	void use(const std::string& dbName) const;
 
 	CS_CONTEXT* _cslibContext;
 	CS_CONNECTION* _connection;

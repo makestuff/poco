@@ -1,4 +1,6 @@
+#include <sstream>
 #include "Poco/Data/Sybase/SessionHandle.h"
+#include "CTLibNames.h"
 
 namespace Poco {
 namespace Data {
@@ -31,6 +33,47 @@ bool SessionHandle::isConnectedNoLock() const
 }
 
 
+#define CHECK_STATUS(funcName) \
+	if ( ret != CS_SUCCEED ) \
+	{ \
+		std::ostringstream msg; \
+		if ( cmd ) \
+			ct_cmd_drop(cmd); \
+		msg << funcName " failed: ret=" << ret;	\
+		throw ConnectionFailedException(msg.str()); \
+	}
+
+#define RESULT_EXPECT(funcName, expRet, expResultType) \
+	if ( ret != expRet || resultType != expResultType ) \
+	{ \
+		std::ostringstream msg; \
+		if ( cmd ) \
+			ct_cmd_drop(cmd); \
+		msg << funcName " failed: ret=" << ret << "; resultType=" << resultTypeName(resultType); \
+		throw ConnectionFailedException(msg.str()); \
+	}
+
+void SessionHandle::use(const std::string& dbName) const
+{
+	std::ostringstream sql;
+	sql << "use " << dbName;
+	CS_COMMAND* cmd = 0;
+	CS_INT resultType;
+	CS_RETCODE ret = ct_cmd_alloc(_connection, &cmd);
+	CHECK_STATUS("ct_cmd_alloc()");
+	ret = ct_command(cmd, CS_LANG_CMD, const_cast<CS_CHAR*>(sql.str().c_str()), CS_NULLTERM, CS_UNUSED);
+	CHECK_STATUS("ct_command()");
+	ret = ct_send(cmd);
+	CHECK_STATUS("ct_send()");
+	ret = ct_results(cmd, &resultType);
+	RESULT_EXPECT("[1]ct_results(USE_DB)", CS_SUCCEED, CS_CMD_SUCCEED);
+	ret = ct_results(cmd, &resultType);
+	RESULT_EXPECT("[2]ct_results(USE_DB)", CS_SUCCEED, CS_CMD_DONE);
+	ret = ct_results(cmd, &resultType);
+	RESULT_EXPECT("[3]ct_results(USE_DB)", CS_END_RESULTS, CS_CMD_DONE);
+	ct_cmd_drop(cmd);
+}
+
 void SessionHandle::connect(const std::map<std::string, std::string>& optionsMap)
 {
 	if ( isConnectedNoLock() )
@@ -60,13 +103,17 @@ void SessionHandle::connect(const std::map<std::string, std::string>& optionsMap
 	const ConstIter serverIter = optionsMap.find("SERVER");
 	if ( serverIter == mapEnd )
 		throw ConnectionException("No SERVER specified in connect-string!");
-
 	const char* const serverStr = serverIter->second.c_str();
 	ret = ct_connect(_connection, (CS_CHAR*)serverStr, CS_NULLTERM);
 	if ( ret == CS_SUCCEED )
 		_isConnected = true;
 	else
 		throw ConnectionFailedException("Connection Error!");
+
+	// Maybe switch databases
+	const ConstIter databaseIter = optionsMap.find("DATABASE");
+	if ( databaseIter != mapEnd )
+		use(databaseIter->second);
 }
 
 

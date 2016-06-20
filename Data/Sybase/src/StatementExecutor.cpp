@@ -34,6 +34,7 @@ namespace
 		case CS_INT_TYPE:
 			return Poco::Data::MetaColumn::FDT_INT32;
 		default:
+			// TODO: how to avoid std::cerr here?
 			std::cerr << Poco::Data::Sybase::dataTypeName(ctlibType) << " is unsupported!\n";
 			return Poco::Data::MetaColumn::FDT_UNKNOWN;
 		}
