@@ -1,3 +1,4 @@
+#include "Poco/Data/Sybase/Connector.h"
 #include "Poco/Data/Session.h"
 #include "Poco/Data/RecordSet.h"
 #include <iostream>
@@ -14,7 +15,8 @@ int main(int argc, char* argv[])
 	try
 	{
 		// create a session
-		Session session("sybase", "SERVER=MOBIX DATABASE=pubs2 CS_USERNAME=sa CS_PASSWORD=mun789");
+		const char* const connStr = "SERVER=MOBIX DATABASE=pubs2 CS_USERNAME=sa CS_PASSWORD=mun789";
+		Session session(Poco::Data::Sybase::Connector::KEY, connStr);
 
 		// drop sample table, if it exists
 		session << "if exists (select 1 from sysobjects where name='person') drop table person", now;

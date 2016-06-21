@@ -5,8 +5,14 @@
 #include "Poco/Data/SessionImpl.h"
 #include "Poco/Data/Connector.h"
 #include "Poco/AutoPtr.h"
-#include "ctpublic.h"
 #include <string>
+
+// ctpublic.h defines CS_CONTEXT as a typedef to "struct _cscontext". Unfortunately,
+// because they're definitions, typedefs cannot be forward-declared, so to avoid
+// including ctpublic.h here, I need to forward-declare "struct _cscontext", and use
+// that instead of CS_CONTEXT.
+//
+struct _cscontext;
 
 // Note: to avoid static (de)initialization problems,
 // during connector automatic (un)registration, it is 
@@ -45,7 +51,7 @@ public:
 		/// Unregisters the Connector under the Keyword Connector::KEY at the Poco::Data::SessionFactory
 
 private:
-	CS_CONTEXT* _ctlibContext;
+	struct _cscontext* _ctlibContext;
 };
 
 
