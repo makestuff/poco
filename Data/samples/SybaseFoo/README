@@ -1,1 +1,3 @@
 valgrind --suppressions=suppress.txt --show-leak-kinds=all --leak-check=full bin/Linux/x86_64/SybaseFood
+
+export SYBASE_CONN="SERVER=MOBIX DATABASE=pubs2 CS_USERNAME=sa CS_PASSWORD=mun789"
