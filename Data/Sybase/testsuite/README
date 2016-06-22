@@ -1,0 +1,2 @@
+export SYBASE_CONN="SERVER=MOBIX DATABASE=pubs2 CS_USERNAME=sa CS_PASSWORD=mun789"
+bin/Linux/x86_64/testrunner -all
